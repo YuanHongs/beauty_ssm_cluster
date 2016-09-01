@@ -30,12 +30,12 @@ public class GoodsController {
 	private GoodsService goodsService;
 
 	/*@RequestMapping(value = "/list", method = RequestMethod.GET)
-	public String list(Model model, Integer offset, Integer limit) {
+	public String list(Model entity, Integer offset, Integer limit) {
 		LOG.info("invoke----------/goods/list");
 		offset = offset == null ? 0 : offset;//默认便宜0
 		limit = limit == null ? 50 : limit;//默认展示50条
 		List<Goods> list = goodsService.getGoodsList(offset, limit);
-		model.addAttribute("goodslist", list);
+		entity.addAttribute("goodslist", list);
 		return "goodslist";
 	}*/
 	
@@ -61,14 +61,15 @@ public class GoodsController {
 	public BaseResult<Object> buy(@CookieValue(value = "userPhone", required = false) Long userPhone,
 			@Valid Goods goods, BindingResult result,HttpSession httpSession){
 		LOG.info("invoke----------/"+goods.getGoodsId()+"/buy userPhone:"+userPhone);
-		/*if (userPhone == null) {
-			return new BaseResult<Object>(false, ResultEnum.PARAM_USER.getMsg());
-		}*/
-		//Valid 参数验证
-		if(result.hasErrors()){
-			String errorInfo="["+result.getFieldError().getField()+"]"+result.getFieldError().getDefaultMessage();
-			return new BaseResult<Object>(false, errorInfo);
+		if (userPhone == null) {
+			return new BaseResult<Object>(false, ResultEnum.INVALID_USER.getMsg());
 		}
+		//Valid 参数验证(这里注释掉，采用AOP的方式验证,见BindingResultAop.java)
+		//if (result.hasErrors()) {
+		//    String errorInfo = "[" + result.getFieldError().getField() + "]" + result.getFieldError().getDefaultMessage();
+		//    return new BaseResult<Object>(false, errorInfo);
+		//}
+
 		//这里纯粹是为了验证集群模式西的session共享功能上
 		LOG.info("lastSessionTime:"+httpSession.getAttribute("sessionTime"));
 		httpSession.setAttribute("sessionTime", System.currentTimeMillis());
